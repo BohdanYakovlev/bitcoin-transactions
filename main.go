@@ -11,10 +11,9 @@ import (
 	"time"
 )
 
-const (
-	limitTimeMillisecond = 1000 * time.Millisecond
-	limitSizeBlockBytes  = 10
-)
+const limitSizeBlockBytes = 1000
+
+var limitTimeMillisecond time.Duration
 
 type transaction struct {
 	id   string
@@ -147,6 +146,55 @@ func readTransactionsFromCSV(path string, startTime time.Time) block {
 	return result
 }
 
+func getDataFilePath() string {
+	var path string
+	var tempTime int
+
+	fmt.Println("Enter data path:")
+
+	_, err := fmt.Scan(&path)
+	if err != nil {
+		fmt.Println("Can not read data")
+	}
+
+	fmt.Println("Enter preferred program running time in milliseconds:")
+	_, err = fmt.Scan(&tempTime)
+	if err != nil {
+		fmt.Println("Can not read time")
+	}
+
+	limitTimeMillisecond = time.Duration(tempTime) * time.Millisecond
+
+	return path
+}
+
+func printTransaction(data []transaction) {
+	for _, iterator := range data {
+		fmt.Printf("Id: %s, Size: %d, Fee: %d\n", iterator.id, iterator.size, iterator.fee)
+	}
+}
+
+func printResult(result block, timeOfWork time.Duration) {
+	fmt.Println("Constructed block:")
+	printTransaction(result.transactions)
+
+	fmt.Printf("Amount of transactions: %d\n", len(result.transactions))
+
+	fmt.Printf("Block size: %d bytes\n", result.totalSize)
+
+	fmt.Printf("The total extracted value: %d\n", result.totalFee)
+
+	fmt.Printf("Construction time: %s\n", timeOfWork.String())
+}
+
 func main() {
-	fmt.Println(readTransactionsFromCSV("transactions.csv", time.Now()))
+
+	dataFilePath := getDataFilePath()
+
+	startTime := time.Now()
+	result := readTransactionsFromCSV(dataFilePath, startTime)
+	endTime := time.Now()
+
+	printResult(result, endTime.Sub(startTime))
+
 }
