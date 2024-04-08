@@ -31,8 +31,12 @@ go run main.go
 ## Input CSV File Format
 The input CSV file should have the following structure:
 ```
-user_id,product_id,timestamp
+tx_id,tx_size,tx_fee
 ```
+Where:
+  - tx_id is the transaction ID.
+  - tx_size is the size of the transaction in bytes.
+  - tx_fee is the fee of the transaction in satoshis.
 
 ## Output
 After processing the transactions, the application will display the following information:
