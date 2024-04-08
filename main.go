@@ -202,6 +202,10 @@ func getDataFilePath() string {
 		fmt.Println("Can not read time")
 	}
 
+	if tempTime <= 0 {
+		panic("Wrong time")
+	}
+
 	limitTimeMillisecond = time.Duration(tempTime) * time.Millisecond
 
 	return path
@@ -222,10 +226,10 @@ func printResult(result block, timeOfWork time.Duration) {
 
 func main() {
 
-	//dataFilePath := "transactions.csv"
-	//limitTimeMillisecond = 30 * time.Millisecond
+	dataFilePath := "transactions.csv"
+	limitTimeMillisecond = 10 * time.Millisecond
 
-	dataFilePath := getDataFilePath()
+	//dataFilePath := getDataFilePath()
 
 	startTime := time.Now()
 	result := readTransactionsFromCSV(dataFilePath, startTime)
