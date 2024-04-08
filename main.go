@@ -37,22 +37,46 @@ func (data *block) init() {
 	data.transactions = make([]transaction, 0, 125)
 }
 
+func (data *block) validateTransaction(transactionData transaction) error {
+	if transactionData.size > limitSizeBlockBytes {
+		return errors.New(fmt.Sprintf("id: %s transaction too large", transactionData.id))
+	}
+
+	if transactionData.fee <= 0 {
+		return errors.New(fmt.Sprintf("id: %s transaction fee must be greater than zero", transactionData.id))
+	}
+
+	if transactionData.size <= 0 {
+		return errors.New(fmt.Sprintf("id: %s transaction size must be greater than zero", transactionData.id))
+	}
+
+	return nil
+}
+
+func (data *block) recordToTransaction(record []string) (transaction, error) {
+
+	var result transaction
+
+	result.id = record[0]
+	result.size, _ = strconv.Atoi(record[1])
+	result.fee, _ = strconv.Atoi(record[2])
+
+	return result, data.validateTransaction(result)
+}
+
 func (data *block) handleRecord(record []string) {
 
-	var tempTransaction transaction
-	tempTransaction.id = record[0]
-	tempTransaction.size, _ = strconv.Atoi(record[1])
-	tempTransaction.fee, _ = strconv.Atoi(record[2])
+	transactionData, err := data.recordToTransaction(record)
+	if err != nil {
+		//fmt.Println(err)
+		return
+	}
 
-	if tempTransaction.size > limitSizeBlockBytes {
+	if data.totalSize+transactionData.size <= limitSizeBlockBytes {
+		data.addTransaction(transactionData, 0)
 		return
 	}
-	newSize := data.totalSize + tempTransaction.size
-	if newSize <= limitSizeBlockBytes {
-		data.addTransaction(tempTransaction, 0)
-		return
-	}
-	data.weighTransaction(tempTransaction)
+	data.weighTransaction(transactionData)
 }
 
 func (data *block) weighTransaction(transactionData transaction) {
@@ -74,11 +98,10 @@ func (data *block) weighTransaction(transactionData transaction) {
 			return
 		}
 		if sizeLost+freeSpace >= transactionData.size {
+			index++
 			break
 		}
 	}
-	index++
-
 	data.totalSize -= sizeLost
 	data.totalFee -= feeLost
 
@@ -86,6 +109,7 @@ func (data *block) weighTransaction(transactionData transaction) {
 }
 
 func (data *block) addTransaction(transactionData transaction, index int) {
+
 	data.totalSize += transactionData.size
 	data.totalFee += transactionData.fee
 	data.transactions = append(data.transactions, transactionData)
@@ -96,6 +120,21 @@ func (data *block) addTransaction(transactionData transaction, index int) {
 	})
 
 	data.transactions = tempMas
+}
+
+func (data *block) countTotalSize() int64 {
+	var totalSize int64 = 0
+	for _, transactionData := range data.transactions {
+		totalSize += int64(transactionData.size)
+	}
+	return totalSize
+}
+
+func (data *block) printTransactions() {
+	fmt.Println("Selected transactions:")
+	for _, iterator := range data.transactions {
+		fmt.Printf("Id: %s, Size: %d, Fee: %d\n", iterator.id, iterator.size, iterator.fee)
+	}
 }
 
 func getReader(filePath string) (*csv.Reader, *os.File) {
@@ -139,7 +178,7 @@ func readTransactionsFromCSV(path string, startTime time.Time) block {
 		}
 
 		endTime := time.Now()
-		if endTime.Sub(startTime) > limitTimeMillisecond {
+		if endTime.Sub(startTime) >= limitTimeMillisecond {
 			isBreakFlag = false
 		}
 	}
@@ -168,15 +207,9 @@ func getDataFilePath() string {
 	return path
 }
 
-func printTransaction(data []transaction) {
-	for _, iterator := range data {
-		fmt.Printf("Id: %s, Size: %d, Fee: %d\n", iterator.id, iterator.size, iterator.fee)
-	}
-}
-
 func printResult(result block, timeOfWork time.Duration) {
-	fmt.Println("Constructed block:")
-	printTransaction(result.transactions)
+
+	result.printTransactions()
 
 	fmt.Printf("Amount of transactions: %d\n", len(result.transactions))
 
@@ -188,6 +221,9 @@ func printResult(result block, timeOfWork time.Duration) {
 }
 
 func main() {
+
+	//dataFilePath := "transactions.csv"
+	//limitTimeMillisecond = 30 * time.Millisecond
 
 	dataFilePath := getDataFilePath()
 
