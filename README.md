@@ -1,4 +1,5 @@
-# [Bitcoin Transactions](https://docs.google.com/document/d/1NgViDj9ELMuFMQDc4aOFCs2jMUkKfd9lHGViSwtFdV0/edit?usp=sharing) Console App
+# Bitcoin Transactions Console App
+[Task #5](https://docs.google.com/document/d/1NgViDj9ELMuFMQDc4aOFCs2jMUkKfd9lHGViSwtFdV0/edit?usp=sharing) in Distributed Lab Challenge
 This console application is designed to construct a Bitcoin block from a list of transactions, maximizing the extracted fee while staying within the block size limit. The program takes a CSV file containing transaction data as input and provides various output metrics related to the constructed block.
 ## How to Run the Code
 
