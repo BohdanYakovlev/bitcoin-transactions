@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"sort"
 	"strconv"
@@ -162,30 +163,31 @@ func getRecord(reader *csv.Reader) ([]string, bool) {
 func readTransactionsFromCSV(path string, startTime time.Time) block {
 
 	reader, file := getReader(path)
-	defer file.Close()
 
+	//Read header of CSV file
 	record, _ := getRecord(reader)
 
 	var result block
 	result.init()
 
-	isBreakFlag := true
-	for isBreakFlag {
+	breakFlag := true
+	for breakFlag {
 
-		record, isBreakFlag = getRecord(reader)
-		if isBreakFlag {
+		record, breakFlag = getRecord(reader)
+		if breakFlag {
 			result.handleRecord(record)
 		}
 
 		endTime := time.Now()
 		if endTime.Sub(startTime) >= limitTimeMillisecond {
-			isBreakFlag = false
+			breakFlag = false
 		}
 	}
+	file.Close()
 	return result
 }
 
-func getDataFilePath() string {
+func getParams() string {
 	var path string
 	var tempTime int
 
@@ -224,12 +226,47 @@ func printResult(result block, timeOfWork time.Duration) {
 	fmt.Printf("Construction time: %s\n", timeOfWork.String())
 }
 
+func update() {
+	file, err := os.Create("transactions.csv")
+	if err != nil {
+		panic(err)
+	}
+
+	writer := csv.NewWriter(file)
+
+	for i := 0; i < 100000; i++ {
+		writer.Write([]string{strconv.Itoa(i), strconv.Itoa(rand.Intn(1000) + 1), strconv.Itoa(rand.Intn(10000) + 1)})
+	}
+
+	writer.Flush()
+	file.Close()
+}
+
+func megaTest() {
+	filename := "transactions.csv"
+	for {
+
+		update()
+		startTime := time.Now()
+		result := readTransactionsFromCSV(filename, startTime)
+		endTime := time.Now()
+
+		printResult(result, endTime.Sub(startTime))
+
+		err := os.Remove(filename)
+		if err != nil {
+			panic(err)
+		}
+
+	}
+}
+
 func main() {
 
-	dataFilePath := "transactions.csv"
-	limitTimeMillisecond = 10 * time.Millisecond
+	//dataFilePath := "transactions.csv"
+	//limitTimeMillisecond = 1000 * time.Millisecond
 
-	//dataFilePath := getDataFilePath()
+	dataFilePath := getParams()
 
 	startTime := time.Now()
 	result := readTransactionsFromCSV(dataFilePath, startTime)
