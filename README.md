@@ -49,10 +49,11 @@ After processing the transactions, the application will display the following in
   - Construction time: Time taken to construct the block.
 ## Algorithm:
   - Read CSV file.
-  - Add the transaction to the block if there is enough empty space or if the fee of the element exceeds the total fee of loss of valuable transaction occupying the same memory. Transaction value is the price to size ratio
-  - Sort block by transaction value.
+  - Add the transaction to the block if there is enough empty space or if the fee of the element exceeds the total fee of loss of valuable transaction occupying the same memory. Transaction value is the price to size ratio.O(k(n+nlog(n)))
+  - Sort block by transaction value(can use a heap to reduce complexity).O(nlog(n))
   - Return result if the time is up or the file runs out
+Total complexity: O(k(n+nlog(n)))
 ## Efficiency:
-The application utilizes a priority queue (min heap) data structure to efficiently select transactions with the highest fee-to-size ratio first. This approach ensures that transactions with the highest fee relative to their size are included in the block first, maximizing the extracted fee while staying within the block size limit.
+The application efficiently selects transactions with the highest fee-to-size ratio first, ensuring that transactions with the highest fee relative to their size are included in the block. This approach maximizes the extracted fee while staying within the block size limit.
 ## Conclusion
 This console application efficiently constructs a Bitcoin block by selecting transactions with the highest fee-to-size ratio, ensuring maximum fee extraction within the 1MB block size limit. It offers a balance between time and space efficiency, making it suitable for processing large transaction datasets. Feel free to reach out if you have any questions or encounter any issues while running the code.
