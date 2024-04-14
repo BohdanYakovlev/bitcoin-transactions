@@ -49,8 +49,8 @@ After processing the transactions, the application will display the following in
   - Construction time: Time taken to construct the block.
 ## Algorithm:
   - Read CSV file.
-  - Add the transaction to the block if there is enough empty space or if the fee of the element exceeds the total fee of the elements occupying the same space.
-  - Sort block by unit value of space if needed.
+  - Add the transaction to the block if there is enough empty space or if the fee of the element exceeds the total fee of loss of valuable transaction occupying the same memory. Transaction value is the price to size ratio
+  - Sort block by transaction value.
   - Return result if the time is up or the file runs out
 ## Efficiency:
 The application utilizes a priority queue (min heap) data structure to efficiently select transactions with the highest fee-to-size ratio first. This approach ensures that transactions with the highest fee relative to their size are included in the block first, maximizing the extracted fee while staying within the block size limit.
